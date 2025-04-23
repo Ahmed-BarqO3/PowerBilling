@@ -3,9 +3,9 @@
         @apply bg-[#232323] border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500;
     }
 
-        .date-picker-dark::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-        }
+    .date-picker-dark::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+    }
 
     .form-input-dark {
         @apply w-full bg-[#232323] border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500;
@@ -57,17 +57,18 @@
         overflow: hidden;
     }
 
-        .glow-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 200%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: 0.5s;
-        }
+    .glow-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 200%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
 
-        .glow-button:hover::before {
-            left: 100%;
-        }
+    .glow-button:hover::before {
+        left: 100%;
+    }
+}

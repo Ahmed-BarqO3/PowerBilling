@@ -1,6 +1,32 @@
 ﻿@page "/"
+@using PowerBilling.WASM.Models
 
-<PageTitle>Home</PageTitle>
+
+
+@code
+{
+	[SupplyParameterFromForm]
+	BillReqset requset { get; set; }
+
+	Bill? bill { get; set; } = default;
+
+	protected override void OnInitialized() => requset??= new BillReqset();
+
+	void Submit()
+	{
+		if (requset.BillType == BillType.Residential)
+			bill = BillingCalculater.CalculateResidentialBill(requset.Consumption,requset.StartDate,requset.EndDate);
+		else
+			bill = BillingCalculater.CalculateCommercialBill(requset.Consumption,requset.StartDate,requset.EndDate);
+
+		StateHasChanged();
+
+	}
+
+}
+
+
+<PageTitle>Power Usage Analytics</PageTitle>
 
 
 <!doctype html>
@@ -9,8 +35,6 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Power Usage Analytics</title>
-
 
 
     <style>
@@ -44,86 +68,86 @@
 </head>
 
 <body class="min-h-screen bg-[#0A0A0A] text-white">
-    <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <!-- Header with gradient text -->
         <div class="mb-8 text-center">
             <h1
-                class="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text">
+                class="mb-2 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-4xl font-bold text-transparent">
                 Power Usage Analytics
             </h1>
             <p class="text-gray-400">Detailed billing breakdown by type and tier</p>
         </div>
 
-        <div class="bg-[#1A1A1A] rounded-2xl border border-gray-800 overflow-hidden backdrop-blur-xl">
+        <div class="overflow-hidden rounded-2xl border border-gray-800 bg-[#1A1A1A] backdrop-blur-xl">
             <!-- Input Form -->
-            <div class="px-6 py-4 border-b border-gray-800 bg-[#111111]">
-                <form id="billingForm" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div class="border-b border-gray-800 bg-[#111111] px-6 py-4">
+                <EditForm Model="requset" OnSubmit="Submit" id="billingForm" class="grid grid-cols-1 gap-4 md:grid-cols-5">
                     <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">
-                            <i data-lucide="building" class="inline-block w-4 h-4 mr-1"></i>
+                        <label class="mb-1 block text-sm font-medium text-gray-400">
+                            <i data-lucide="building" class="mr-1 inline-block h-4 w-4"></i>
                             Billing Type
                         </label>
-                        <select name="billingType"
-                            class="w-full bg-[#232323] border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500">
-                            <option value="Residential">Residential</option>
-                            <option value="Commercial">Commercial</option>
-                        </select>
+                        <InputSelect @bind-Value="requset.BillType" name="billingType"
+                            class="w-full rounded-lg border border-gray-700 bg-[#232323] px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500">
+                            <option  value="Residential">Residential</option>
+                            <option  value="Commercial">Commercial</option>
+                        </InputSelect>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">
-                            <i data-lucide="calendar-range" class="inline-block w-4 h-4 mr-1"></i>
+                        <label class="mb-1 block text-sm font-medium text-gray-400">
+                            <i data-lucide="calendar-range" class="mr-1 inline-block h-4 w-4"></i>
                             Start Date
                         </label>
-                        <input type="date" name="startDate"
-                            class="w-full bg-[#232323] border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
+                        <InputDate @bind-Value="requset.StartDate"   name="startDate"
+                            class="w-full rounded-lg border border-gray-700 bg-[#232323] px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
                             required />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">
-                            <i data-lucide="calendar-check" class="inline-block w-4 h-4 mr-1"></i>
+                        <label class="mb-1 block text-sm font-medium text-gray-400">
+                            <i data-lucide="calendar-check" class="mr-1 inline-block h-4 w-4"></i>
                             End Date
                         </label>
-                        <input type="date" name="endDate"
-                            class="w-full bg-[#232323] border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
+                        <InputDate @bind-Value="requset.EndDate"  name="endDate"
+                            class="w-full rounded-lg border border-gray-700 bg-[#232323] px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
                             required />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">
-                            <i data-lucide="gauge" class="inline-block w-4 h-4 mr-1"></i>
+                        <label class="mb-1 block text-sm font-medium text-gray-400">
+                            <i data-lucide="gauge" class="mr-1 inline-block h-4 w-4"></i>
                             Consumption (kWh)
                         </label>
-                        <input type="number" name="consumption" placeholder="Enter kWh"
-                            class="w-full bg-[#232323] border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
+                        <InputNumber @bind-Value="requset.Consumption" type="number" name="consumption" placeholder="Enter kWh"
+                            class="w-full rounded-lg border border-gray-700 bg-[#232323] px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500"
                             required />
                     </div>
                     <div class="flex items-end">
                         <button type="submit"
-                            class="w-full glow-button bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-lg px-4 py-2.5 text-sm font-medium flex items-center justify-center space-x-2 transition-all duration-200 shadow-lg shadow-blue-500/20 hover:shadow-purple-500/20">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            class="glow-button flex w-full items-center justify-center space-x-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/20 transition-all duration-200 hover:from-blue-500 hover:to-purple-500 hover:shadow-purple-500/20">
+                            <i data-lucide="plus" class="h-4 w-4"></i>
                             <span>Add Entry</span>
                         </button>
                     </div>
-                </form>
+                </EditForm>
             </div>
 
             <!-- Table Header -->
-            <div class="px-6 py-4 border-b border-gray-800 bg-[#111111]">
+            <div class="border-b border-gray-800 bg-[#111111] px-6 py-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <div class="p-2 bg-blue-500/10 rounded-lg">
-                            <i data-lucide="table" class="w-5 h-5 text-blue-400"></i>
+                        <div class="rounded-lg bg-blue-500/10 p-2">
+                            <i data-lucide="table" class="h-5 w-5 text-blue-400"></i>
                         </div>
                         <h2 class="text-lg font-medium text-gray-200">Billing Details</h2>
                     </div>
                     <div class="flex items-center space-x-4">
                         <div
-                            class="flex items-center space-x-2 text-gray-400 bg-[#232323] px-3 py-1.5 rounded-full text-sm">
-                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                            class="flex items-center space-x-2 rounded-full bg-[#232323] px-3 py-1.5 text-sm text-gray-400">
+                            <i data-lucide="calendar" class="h-4 w-4"></i>
                             <span>March 2024</span>
                         </div>
                         <div
-                            class="flex items-center space-x-2 text-gray-400 bg-[#232323] px-3 py-1.5 rounded-full text-sm">
-                            <i data-lucide="bar-chart" class="w-4 h-4"></i>
+                            class="flex items-center space-x-2 rounded-full bg-[#232323] px-3 py-1.5 text-sm text-gray-400">
+                            <i data-lucide="bar-chart" class="h-4 w-4"></i>
                             <span>Real-time Data</span>
                         </div>
                     </div>
@@ -135,42 +159,42 @@
                 <table class="min-w-full divide-y divide-gray-800">
                     <thead>
                         <tr class="bg-[#111111]">
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                                 <div class="flex items-center space-x-2">
-                                    <i data-lucide="building" class="w-4 h-4"></i>
+                                    <i data-lucide="building" class="h-4 w-4"></i>
                                     <span>Billing Type</span>
                                 </div>
                             </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                                 <div class="flex items-center space-x-2">
-                                    <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                                    <i data-lucide="calendar-range" class="h-4 w-4"></i>
                                     <span>Date Range</span>
                                 </div>
                             </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                                 <div class="flex items-center space-x-2">
-                                    <i data-lucide="layers" class="w-4 h-4"></i>
+                                    <i data-lucide="layers" class="h-4 w-4"></i>
                                     <span>Tier</span>
                                 </div>
                             </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                                 <div class="flex items-center space-x-2">
-                                    <div class="p-1 bg-yellow-500/10 rounded">
-                                        <i data-lucide="zap" class="w-4 h-4 text-yellow-400"></i>
+                                    <div class="rounded bg-yellow-500/10 p-1">
+                                        <i data-lucide="zap" class="h-4 w-4 text-yellow-400"></i>
                                     </div>
                                     <span>Consumption (kWh)</span>
                                 </div>
                             </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                                 <div class="flex items-center space-x-2">
-                                    <i data-lucide="percent" class="w-4 h-4"></i>
+                                    <i data-lucide="percent" class="h-4 w-4"></i>
                                     <span>Rate ($/kWh)</span>
                                 </div>
                             </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
                                 <div class="flex items-center space-x-2">
-                                    <div class="p-1 bg-green-500/10 rounded">
-                                        <i data-lucide="dollar-sign" class="w-4 h-4 text-green-400"></i>
+                                    <div class="rounded bg-green-500/10 p-1">
+                                        <i data-lucide="dollar-sign" class="h-4 w-4 text-green-400"></i>
                                     </div>
                                     <span>Amount</span>
                                 </div>
@@ -178,25 +202,44 @@
                         </tr>
                     </thead>
                     <tbody id="billingTableBody" class="divide-y divide-gray-800">
+                    <!-- Example row will be here -->
                         <!-- Example row will be here -->
-                    </tbody>
-                    <tfoot class="bg-[#111111]">
-                        <tr>
-                            <td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
-                                <div class="flex items-center space-x-2">
-                                    <i data-lucide="calculator" class="w-4 h-4"></i>
-                                    <span>Total</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <span id="totalConsumption" class="text-yellow-400">0 kWh</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
-                                Avg: <span id="averageRate">$0.00</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <span id="totalAmount" class="text-green-400">$0.00</span>
-                            </td>
+                        @if (bill is not null)
+						{
+							foreach (var detail in bill.Details)
+							{
+								@if (detail.Total > 0)
+								{
+								<tr>
+									<td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-300">@bill.Type</td>
+									<td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-300">@bill.StartDate.ToShortDateString() - @bill.EndDate.ToShortDateString()</td>
+									<td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-300">@detail.TierName</td>
+									<td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-300">@detail.Consumption</td>
+									<td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-300">@detail.Rate</td>
+									<td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-300">@detail.Total</td>
+								</tr>
+								}
+							}
+						}
+					</tbody>
+					<tfoot class="bg-[#111111]">
+						<tr >
+							<td colspan="3" class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-300">
+								<div class="flex items-center space-x-2">
+									<i data-lucide="calculator" class="h-4 w-4"></i>
+									<span>Total</span>
+								</div>
+							</td>
+							<td class="whitespace-nowrap px-6 py-4 text-sm font-medium"> 
+							 	<span id="totalConsumption" class="text-yellow-400">0 kWh</span> 
+							</td> 
+							 <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-300"> 
+							 	Avg: <span id="averageRate">$@(bill is not null ? Math.Round( bill.Details.Select(x => x.Total).Average(),2): 0)</span> 
+							 </td>
+							<td class="items-end whitespace-nowrap px-6 py-4 text-sm font-medium">
+
+								<span id="totalAmount" class="text-green-400">$@(bill is not null ? bill.Details.Select(x => x.Total).Sum(): 0)</span>
+							</td>
                         </tr>
                     </tfoot>
                 </table>
